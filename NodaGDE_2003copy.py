@@ -17,11 +17,11 @@ from timeit import default_timer as timer  # загрузка функции-т�
 import os  # модуль для проверки информации о файлах
 import Global_parametrs as gp  # глобальные переменные (Входные данные)
 import numpy as np  # подключение библиотеки numpy
-from math import sqrt
+from math import sqrt, exp
 
 start = timer()  # запуск таймера
 
-path_main = "/home/JulyaS/Work/БеларусьКалий/Коагуляция_Оседание/Nodel GDE/Supplemental material _NodalDGE_2003 /main.inp"
+path_main = "main.inp"
 if os.path.exists(path_main) == False and os.path.getsize(path_main) <= 0:
     print("\033[1;35mWarning: \033[1;30m Could not open file!")
     exit()
@@ -63,7 +63,7 @@ else:
     # We do not have to worry about monomers, since we are concerned with coagulation only.
 
     if choice == 1:
-        path_coag = "/home/JulyaS/Work/БеларусьКалий/Коагуляция_Оседание/Nodel GDE/Supplemental material _NodalDGE_2003 /coag.inp"
+        path_coag = "coag.inp"
         if os.path.exists(path_coag)==False and os.path.getsize(path_coag) <= 0:
             print("\033[1;35mWarning: \033[1;30m Could not open file!")
             exit()
@@ -178,24 +178,3 @@ else:
 
 end = timer()  # остановка таймера
 print('время выполнения: %.3e с' % (end - start))
-
-    # // ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-    # // Nucleation + Coagulation
-    # // ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-    if choice == 2:
-        path_coag = "/home/JulyaS/Work/БеларусьКалий/Коагуляция_Оседание/Nodel GDE/Supplemental material _NodalDGE_2003 /coag.inp"
-        if os.path.exists(path_coag) == False and os.path.getsize(path_coag) <= 0:
-            print("\033[1;35mWarning: \033[1;30m Could not open file!")
-            exit()
-        else:
-            v = np.zeros(MAX + 1)
-            v[0] = v1 # Assigning first node to monomer. Note that these are not considered as particles.
-            N = np.zeros(MAX + 1) #Setting initial number of particles = 0 in all the nodes.
-            for i in range(1, MAX):  # Defining volume spacing of bins. Using a geometric factor of 2 to cover 1nm to 10 micrometer size particles
-                v[i]=v[0]*pow(q,(i-1));
-                m[i]=rho*v[i];
-                dp[i]=pow(6.0*v[i]/pi,0.3333333);
-
-
-
-
