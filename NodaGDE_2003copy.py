@@ -18,6 +18,7 @@ import os  # модуль для проверки информации о фай
 import Global_parametrs as gp  # глобальные переменные (Входные данные)
 import numpy as np  # подключение библиотеки numpy
 from math import sqrt, exp
+import plotResults
 
 start = timer()  # запуск таймера
 
@@ -77,20 +78,20 @@ else:
             T = float(fptr1.readline().split()[-1])  # Temperature(Kelvin):
             fptr1.close()  # Closing the coag property data
 
-            v = np.zeros(MAX+1)
+            v = np.zeros(MAX)
             v[0] = 1e-27 * gp.pi * d**3 / 6  # Setting volume of particle
             # that the user enters as the smallest node(coagulation would never lead to decrease in particle size).
-            dp = np.zeros(MAX+1)
+            dp = np.zeros(MAX)
             dp[0] = (6*v[0]/gp.pi)**(1/3)  # Setting diametr of particle (? why not = d?)
-            m = np.zeros(MAX+1)
+            m = np.zeros(MAX)
             m[0] = v[0] * rho
-            for i in range(1, MAX+1):
+            for i in range(1, MAX):
                 v[i] = v[0] * q**i
                 dp[i] = (6 * v[i] / gp.pi)**(1/3)
                 m[i] = v[i] * rho
 
             X = np.zeros((MAX, MAX, MAX))  # Calculation of size splitting operators.
-            for k in range(1, MAX):
+            for k in range(1, MAX-1):
                 for i in range(0, MAX):
                     for j in range(0, MAX):
                         # Conditions in parentheses check if the combined volume of colliding particles is between k and k+1.
@@ -170,11 +171,18 @@ else:
                 Vtot = 0
                 print("\n %e \t %e \t %e \t %e \t %e \t %e" % (t, Ninf, N[1], N[5], N[10], N[15]))
                 t = t + step
+
+            data = open('res_Coagulation_0.01s.txt', 'w')
             # Printing the final number distribution after SPD is reached.
             print("\n\n***Size Distribution after reaching SPD****\n")
             print("\n volume \t\t number")
             for i in range(1, MAX):
-                print("\n %e \t %e" % (v[i], N[i]))
+                print("%e \t %e" % (v[i], N[i]))
+                data.write("%e \t %e \n" % (v[i], N[i]))
+            data.close()
+
+plotResults.plot_distribution(v, N)
+
 
 end = timer()  # остановка таймера
 print('время выполнения: %.3e с' % (end - start))
