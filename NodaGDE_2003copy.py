@@ -52,11 +52,11 @@ else:
     fptr.close()  # Closing the main property data file.
     q = 10.0**(12.0/(MAX - 1))  # Calculation of geometric spacing factor which depends on the number of nodes.
     v1 = MW/(rho*gp.Na)  # Volume of a monomer unit (a molecule); Na is the Avogadro's Number.
-    parameters = {'MAX': MAX, 'P': P,'rho': rho,'A_mu': A_mu, 'B_mu': B_mu, 'q': q, 'beta_option': beta_option}
+    parameters = {'MAX': MAX, 'P': P, 'T': T, 'rho': rho, 'A_mu': A_mu, 'B_mu': B_mu, 'A': A, 'B': B, 'C': C, 'D': D, 'q': q, 'beta_option': beta_option, 'v1': v1, 'coolrate': coolrate}
     if choice == 1:  # PURE COAGULATION
         v, N = Coagulation(parameters)
     if choice == 2:
-        Coagulation_Nucleation()
+        v, N = Coagulation_Nucleation(parameters)
 
 plotResults.plot_distribution(v, N)
 
