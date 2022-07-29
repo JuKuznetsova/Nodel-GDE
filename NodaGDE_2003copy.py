@@ -59,7 +59,7 @@ else:
         v, N = Coagulation_Nucleation(parameters)
 
 plotResults.plot_distribution(v, N)
-
+plotResults.plot_distribution_NodelToPNC(N)
 
 end = timer()  # остановка таймера
 print('время выполнения: %.3e с' % (end - start))

@@ -19,19 +19,22 @@ def plot_distribution(x, y):
         x[i] = log10(x[i] * N_tot / V_tot)
 
     plt.plot(x, y)
-    plt.savefig('fig_res_CoagulationDistribution.png')
+    plt.savefig('fig_res_Coagulation.png')
 
 
-# x = []
-# y = []
-# data = open('res_Coagulation_0.01s.txt', 'r')
-# i = 0
-# for line in data.readlines():
-#     if i % 2 == 0:
-#         x.append(float(line.split()[0]))
-#         y.append(float(line.split()[1]))
-#     i = i+1
-# data.close()
-#
-# plot_distribution(x, y)
-# print('Done!')
+# plot graphic x = nodel, y = PNC (Particle Number Concentration(#/m**3))
+def plot_distribution_NodelToPNC(y):
+    plt.plot(range(len(y)), y)
+    plt.xlabel('Nodel')
+    plt.ylabel('Particle Number Concentration(#/m**3)')
+    plt.savefig('fig_res_CoagulationNucleation.png')
+
+
+data = open('res_Coagulation_Nucleation.txt', 'r')
+y = []
+for line in data.readlines():
+    y.append(float(line.split()[1]))
+data.close()
+
+plot_distribution_NodelToPNC(y)
+print('Done!')
