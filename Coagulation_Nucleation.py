@@ -46,18 +46,18 @@ def Coagulation_Nucleation(parameters):
                 else:
                     X[i][j][k] = 0
     t = 0.0  # Initializing time.
-    step = 5e-4  # Timestep for integration
+    step = 1e-7  # Timestep for integration
     S = 1.001  # Setting initial saturation ratio,
     # a little larger than 1. Hereafter the saturation ratio is determined
     # by cooling or heating rate of the aerosol. A heating rate would require
     # a negative value
 
-    # Calculating surface area of the monomer, given the volume of monomer v1
-    temp1 = 6 * v[0] / gp.pi
-    s1 = gp.pi * temp1**(2/3)
+    # Calculating surface area of the monomer, given the volume of monomer v0
+    temp0 = 6 * v[0] / gp.pi
+    s0 = gp.pi * temp0**(2/3)
 
     # Calculating mass of the monomer unit
-    m1 = rho * v[0]
+    m0 = rho * v[0]
 
     # Calculating saturation vapor pressure for the Aerosol.
     Ps = exp(13.07-36373.0/T)*101325.0*P
@@ -67,23 +67,23 @@ def Coagulation_Nucleation(parameters):
 
     # Calculating monomer concentration ( multiplying saturation ratio by saturation concentration of monomers).
     N[0] = S * ns
-
     counter = 0  # Temporary variable for printing after a large number of iterations
     print("\n time \t\t Monomer \t\t Jk \t\t S \t\t Dp_mean \t\t k* \t\t Ntot")
-    while T > 300:  # Calculating aerosol properties until the system cools down to 27 C.
+    while T > 500:  # Calculating aerosol properties until the system cools down to 27 C.
         sigma = (A - B*T) * 1e-3  # Surface tension
         Ps = exp(C - D/T) * 101325.0 * P  # Saturation pressure
-        ns = Ps / (gp.kb*T)  # Saturation concentration of monomers using ideal gas law
+        ns = Ps / (gp.kb * T)  # Saturation concentration of monomers using ideal gas law
         S = N[0] / ns  # Saturation ratio
-        theta = (s1 * sigma)/(gp.kb * T)  # Dimensionless surface tension theta
-        a = (2*sigma)/(gp.pi*m1)  # Temporary variable
+        theta = (s0 * sigma)/(gp.kb * T)  # Dimensionless surface tension theta
+        a = (2 * sigma) / (gp.pi * m0)  # Temporary variable
         b = theta - (4 * theta**3)/(27 * log(S)**2)  # Temporary variable.
         Jk = ns**2 * S * v[0] * a**(1/2) * exp(b)  # Nucleation rate using the classical SCC model.
-        c = (3/3) * theta/log(S)  # Temporary variable.
+        c = (2/3) * theta/log(S)  # Temporary variable.
         kstar = c**3  # Calculating critical cluster size that will determine the node at which nucleation occurs.
         dpstar = 4 * sigma*v[0]/(gp.kb * T * log(S))  # Size of particles corresponding to the critical node.
         vstar = gp.pi * dpstar**3 / 6  # Volume of particle corresponding to the critical node.
         Ntot = 0.0  # Initializing total number of particles to zero, as there are no particles prior to nucleation.
+
         for i in range(MAX):
             Ntot = Ntot + N[i]  # Total number of particles (does not include monomers).
         Vtot = 0.0
@@ -107,7 +107,7 @@ def Coagulation_Nucleation(parameters):
                 for j in range(MAX):
                     temp1 = 1/v[i] + 1/v[j]
                     temp2 = v[i]**(1/3) + v[j]**(1/3)
-                    K[i][j] = (3.0/(4.0*gp.pi))**(0.1666666) * (6.0*gp.kb * T / rho)**(1/2) * temp1**(1/2) * temp2**2
+                    K[i][j] = (3.0 / (4.0 * gp.pi))**(1/6) * (6.0 * gp.kb * T / rho)**(1/2) * temp1**(1/2) * temp2**2
                     if K[i][j] < Kmin:
                         Kmin = K[i][j]  # Calculating the smallest collision frequency
                         # function to decide the characteristic coagulation time.
@@ -137,7 +137,7 @@ def Coagulation_Nucleation(parameters):
         zeta = np.zeros(MAX)
         for k in range(1, MAX):
             if vstar < v[0]:
-                zeta[2] = vstar / v[2]  # Putting particles formed smaller than monomers in the smallest particle node (node 2). This situation arises when k* falls below monomer size.
+                zeta[1] = vstar / v[1]  # Putting particles formed smaller than monomers in the smallest particle node (node 2). This situation arises when k* falls below monomer size.
             elif (v[k-1] <= vstar) and (vstar < v[k]):
                 zeta[k] = vstar/v[k]  # Putting particles in node just larger than k*
             else:
@@ -148,10 +148,10 @@ def Coagulation_Nucleation(parameters):
             # Initializing gain and loss terms for coagulation
             sum1 = 0.0  # Production term due to collision of two smaller particles to form a k size particle
             sum2 = 0.0  # Loss term due to collision of k size particle with any other particle
-            for i in range(1, MAX):
+            for i in range(MAX):
                 sum2 = sum2 + K[k][i]*N[i]  # k collides with any other particle to get out of node k, thus loss term
-                for j in range(1, k+1):
-                    sum1 = sum1 + X[i][j][k] * K[i][j] * N[i]*N[j]  # i and j collide to form particle of size k
+                for j in range(0, k+1):
+                    sum1 = sum1 + X[i][j][k] * K[i][j] * N[i] * N[j]  # i and j collide to form particle of size k
                     # which is then multiplied by the size splitting operator to put the particles
                     # in the adjacent nodes after adjusting the volume
 
@@ -162,6 +162,12 @@ def Coagulation_Nucleation(parameters):
         N[0] = N[0] - Jk*kstar*step
         T = T - step * coolrate  # Temperature would decrease as time progresses, due to cooling.
         t = t + step  # Time increment
+
+        # Ninf = 0  # Total number of particles, which is zero initially.
+        # for i in range(0, MAX):
+        #     Ninf = Ninf + N[i]  # N_infinity as we get by solving the coagulation part of GDE.
+        #
+        # step = 1e-5 / (Kmin * Ninf)
 
     data = open('res_Coagulation_Nucleation.txt', 'w')
     print("\n\nFinal Particle Size Distribution\n\n")

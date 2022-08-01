@@ -1,6 +1,4 @@
 # plot calculation results
-import math
-
 import matplotlib.pyplot as plt
 from math import log10
 
@@ -20,6 +18,7 @@ def plot_distribution(x, y):
 
     plt.plot(x, y)
     plt.savefig('fig_res_Coagulation.png')
+    plt.close()
 
 
 # plot graphic x = nodel, y = PNC (Particle Number Concentration(#/m**3))
@@ -30,11 +29,11 @@ def plot_distribution_NodelToPNC(y):
     plt.savefig('fig_res_CoagulationNucleation.png')
 
 
-data = open('res_Coagulation_Nucleation.txt', 'r')
-y = []
-for line in data.readlines():
-    y.append(float(line.split()[1]))
-data.close()
-
-plot_distribution_NodelToPNC(y)
-print('Done!')
+# data = open('res_Coagulation_Nucleation.txt', 'r')
+# y = []
+# for line in data.readlines():  # last line is empty
+#     y.append(float(line.split()[1]))
+# data.close()
+#
+# plot_distribution_NodelToPNC(y)
+# print('Done!')
